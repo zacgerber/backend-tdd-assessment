@@ -70,7 +70,8 @@ def test_help(self):
         ["python", "./echo.py", "-h"],
         stdout=subprocess.PIPE)
     stdout, _ = process.communicate()
-    usage = open("./USAGE", "r").read()
+    with open("USAGE") as f:
+        usage = f.read()
 
     self.assertEquals(stdout, usage)
 ```
