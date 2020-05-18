@@ -83,6 +83,13 @@ class TestEcho(unittest.TestCase):
             self.module.main(args)
         self.assertEqual(output[0], args[0])
 
+    def test_lower_short(self):
+        """Check if short option '-l' performs lowercasing"""
+        args = ["-l", "HELLO WORLD"]
+        with Capturing() as output:
+            self.module.main(args)
+        self.assertEqual(output[0], "hello world")
+
     #
     # Students: add more tests here.
     #
