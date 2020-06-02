@@ -9,14 +9,16 @@ import sys
 
 
 def create_parser():
-    """Creates and returns an argparse cmd line option parser."""
-    pass
+    """Returns an instance of argparse.ArgumentParser"""
+    # your code here
+    return
 
 
 def main(args):
-    """Implementation of echo."""
-    pass
+    """Implementation of echo"""
+    # your code here
+    return
 
 
 if __name__ == '__main__':
-    pass
+    main(sys.argv[1:])
