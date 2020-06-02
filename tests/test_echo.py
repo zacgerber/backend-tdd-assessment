@@ -14,6 +14,7 @@ import importlib
 import inspect
 import argparse
 import unittest
+import subprocess
 from io import StringIO
 
 # devs: change this to 'soln.echo' to run this suite against the solution
@@ -21,6 +22,7 @@ PKG_NAME = 'echo'
 
 
 # This is a helper class for the main test class
+# Students can use this class object in their code
 class Capturing(list):
     """Context Mgr helper for capturing stdout from a function call"""
     def __enter__(self):
@@ -32,6 +34,25 @@ class Capturing(list):
         self.extend(self._stringio.getvalue().splitlines())
         del self._stringio    # free up some memory
         sys.stdout = self._stdout
+
+
+# Students can use this function in their code
+def run_capture(pyfile, args=()):
+    """
+    Runs a python program in a separate process,
+    returns stdout and stderr outputs as 2-tuple
+    """
+    cmd = ["python", pyfile]
+    cmd.extend(args)
+    p = subprocess.Popen(
+        cmd,
+        stdout=subprocess.PIPE, stderr=subprocess.PIPE
+        )
+    stdout, stderr = p.communicate()
+    stdout = stdout.decode().splitlines()
+    stderr = stderr.decode().splitlines()
+    assert stdout or stderr, "The program is not printing any output"
+    return stdout, stderr
 
 
 # Student shall complete this TestEcho class so that all tests run and pass.
@@ -63,35 +84,38 @@ class TestEcho(unittest.TestCase):
     def test_parser(self):
         """Check if create_parser() returns a parser object"""
         result = self.module.create_parser()
-        self.assertIsInstance(result, argparse.ArgumentParser)
+        self.assertIsInstance(
+            result, argparse.ArgumentParser,
+            "create_parser() function is not returning a parser object")
 
     #
     # Students: add more parser tests here
     #
 
-    def test_main_return(self):
+    def test_echo(self):
         """Check if main() function prints anything at all"""
-        args = ['--help']
-        with Capturing() as output:
-            self.module.main(args)
-        self.assertGreater(len(output), 0)
+        stdout, stderr = run_capture(self.module.__file__)
+        pass
 
-    def test_main_echo(self):
+    def test_simple_echo(self):
         """Check if main actually echoes an input string"""
         args = ['Was soll die ganze Aufregung?']
-        with Capturing() as output:
-            self.module.main(args)
-        self.assertEqual(output[0], args[0])
+        stdout, stderr = run_capture(self.module.__file__, args)
+        self.assertEqual(
+            stdout[0], args[0],
+            "The program is not performing simple echo"
+            )
 
     def test_lower_short(self):
         """Check if short option '-l' performs lowercasing"""
         args = ["-l", "HELLO WORLD"]
         with Capturing() as output:
             self.module.main(args)
+        assert output, "The program did not print anything."
         self.assertEqual(output[0], "hello world")
 
     #
-    # Students: add more tests here.
+    # Students: add more cmd line options tests here.
     #
 
 
