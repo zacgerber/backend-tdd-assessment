@@ -81,36 +81,48 @@ program should print the following usage message:
         -l, --lower  convert text to lowercase
         -t, --title  convert text to titlecase
 
-The following unit test can be used to check that your program prints a properly formatted help message.  It does this by launching a completely separate python process, and running your echo.py in that process, and saving the output for comparison:
 
-```python
-def test_help(self):
-    """Running the program without arguments should show usage."""
+This text is actually composed and printed by the `Argparse` module.  Argparse will assemble the various description and help messages that you have coded into your parser object, and print them all in a coherent "USAGE" message. The `test_echo.py` file also contains TWO helper methods that will allow you to capture the printed output of echo.py.  One of these methods launches a python program from an external process, the other method just uses the current process to intercept printed strings.  Can you tell which is which?
 
-    # Run the command `python ./echo.py -h` in a separate process, then
-    # collect its output.
-    process = subprocess.Popen(
-        ["python", "./echo.py", "-h"],
-        stdout=subprocess.PIPE)
-    stdout, _ = process.communicate()
-    with open("USAGE") as f:
-        usage = f.read()
+        ```python
+        # Students can use this function in their code
+        def run_capture(pyfile, args=()):
+            """
+            Runs a python program in a separate process,
+            returns stdout and stderr outputs as 2-tuple
+            """
+            cmd = ["python", pyfile]
+            cmd.extend(args)
+            p = subprocess.Popen(
+                cmd,
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE
+                )
+            stdout, stderr = p.communicate()
+            stdout = stdout.decode().splitlines()
+            stderr = stderr.decode().splitlines()
+            assert stdout or stderr, "The program is not printing any output"
+            return stdout, stderr
+         ```
 
-    self.assertEqual(stdout, usage)
-```
+Here is the other way to capture printed output:
 
-However, the `test_echo.py` file also contains a class helper that will allow you to capture the printed output of echo.py without needing to launch a new process.  So you could also try this test instead
+        ```python
+        # This is a helper class for the main test class
+        # Students can use this class object in their code
+        class Capturing(list):
+            """Context Mgr helper for capturing stdout from a function call"""
+            def __enter__(self):
+                self._stdout = sys.stdout
+                sys.stdout = self._stringio = StringIO()
+                return self
 
-```python
-def test_help(self):
-        """ Check that usage is printed when -h option is given"""
-        args = ["-h"]
-        with open("USAGE") as f:
-            usage = f.read().splitlines()
-        with Capturing() as output:
-            self.module.main(args)
-        self.assertEqual(output, usage)
-```
+            def __exit__(self, *args):
+                self.extend(self._stringio.getvalue().splitlines())
+                del self._stringio    # free up some memory
+                sys.stdout = self._stdout
+        ```
+
+This code is provided for you inside the test_echo.py file.  Study these methods and understand how each of them work.  For this Help/Usage step, you will want to use the one that runs your program as a separate process. 
 
 ### Step 2: Test the `-u/--upper option`
 Write a unit test that asserts that `upper` gets stored inside of the
