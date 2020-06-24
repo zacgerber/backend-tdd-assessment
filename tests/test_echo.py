@@ -90,7 +90,7 @@ class TestEcho(unittest.TestCase):
 
     def test_help(self):
         """Check if usage output matches what is expected"""
-        args = ["-h"]
+        args = ['--help']
         stdout, stderr = run_capture(self.module.__file__, args)
         with open('USAGE') as f:
             usage = f.read()
